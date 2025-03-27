@@ -4,16 +4,19 @@ import axiosInstance from '../axiosConfig';
 
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     try {
       await axiosInstance.post('/api/auth/register', formData);
       alert('Registration successful. Please log in.');
       navigate('/login');
     } catch (error) {
-      alert('Registration failed. Please try again.');
+      setError(error.response?.data?.message || 'Registration failed. Please try again.');
     }
   };
 
@@ -21,12 +24,16 @@ const Register = () => {
     <div className="max-w-md mx-auto mt-20">
       <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
         <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
+
+        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+
         <input
           type="text"
           placeholder="Name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+          required
         />
         <input
           type="email"
@@ -34,6 +41,7 @@ const Register = () => {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+          required
         />
         <input
           type="password"
@@ -41,8 +49,10 @@ const Register = () => {
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+          required
         />
-        <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
+
+        <button type="submit" className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 transition">
           Register
         </button>
       </form>

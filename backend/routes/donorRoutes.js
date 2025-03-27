@@ -1,13 +1,12 @@
-// routes/donorRoutes.js
 const express = require('express');
 const router = express.Router();
 const donorController = require('../controllers/donorController');
 
-// Routes
-router.get('/donors', donorController.getAllDonors);
-router.get('/donors/:id', donorController.getDonorById);
-router.post('/donors', donorController.createDonor);
-router.put('/donors/:id', donorController.updateDonor);
-router.delete('/donors/:id', donorController.deleteDonor);
+// Correct routes (already prefixed with /api/donors)
+router.get('/', donorController.getDonors);
+router.get('/:id', donorController.getDonorById);
+router.post('/', donorController.createDonor);
+router.put('/:id', donorController.updateDonor);
+router.delete('/:id', donorController.deleteDonor);
 
 module.exports = router;

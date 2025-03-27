@@ -53,6 +53,15 @@ app.get("/", (req, res) => {
     res.send("Charity Donation API is running...");
 });
 
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));        
+app.use('/api/donors', require('./routes/donorRoutes'));      
+app.use('/api/campaigns', require('./routes/campaignRoutes'));
+app.use('/api/donations', require('./routes/donationRoutes')); 
+
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+
