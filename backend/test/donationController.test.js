@@ -21,26 +21,38 @@ describe('Donation Controller', () => {
     const req = {
       body: {
         amount: 100,
-        donorId: new mongoose.Types.ObjectId(),
+        campaign: new mongoose.Types.ObjectId()  // required
       },
+      user: {
+        id: new mongoose.Types.ObjectId()        // mocked auth
+      }
     };
     const res = { status: sinon.stub().returnsThis(), json: sinon.spy() };
-
-    const donation = { _id: new mongoose.Types.ObjectId(), ...req.body };
+  
+    const donation = { _id: new mongoose.Types.ObjectId(), ...req.body, donor: req.user.id };
     sinon.stub(Donation, 'create').resolves(donation);
-
+  
     await createDonation(req, res);
     expect(res.status.calledWith(201)).to.be.true;
     expect(res.json.calledWith(donation)).to.be.true;
   });
 
+
   it('should get all donations', async () => {
     const res = { status: sinon.stub().returnsThis(), json: sinon.spy() };
-    sinon.stub(Donation, 'find').resolves([{ amount: 50 }]);
-
+  
+    // Mock the chained `.populate().populate()` call
+    const secondPopulate = sinon.stub().returns(Promise.resolve([{ amount: 50 }]));
+    const firstPopulate = sinon.stub().returns({ populate: secondPopulate });
+  
+    sinon.stub(Donation, 'find').returns({ populate: firstPopulate });
+  
     await getDonations({}, res);
+  
     expect(res.status.calledWith(200)).to.be.true;
+    expect(res.json.calledWith([{ amount: 50 }])).to.be.true;
   });
+  
 
   it('should get a donation by ID', async () => {
     const id = new mongoose.Types.ObjectId();
