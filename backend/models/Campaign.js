@@ -6,6 +6,7 @@ const campaignSchema = new mongoose.Schema({
     goalAmount: { type: Number, required: true },
     raisedAmount: { type: Number, default: 0 },
     endDate: { type: Date }
+    
 });
 
 module.exports = mongoose.model("Campaign", campaignSchema);

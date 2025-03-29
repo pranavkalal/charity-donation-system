@@ -5,33 +5,27 @@ import { useAuth } from '../context/AuthContext';
 const DonationForm = ({ onDonationCreated }) => {
   const [formData, setFormData] = useState({
     amount: '',
-    donor: '',
-    campaign: '',
+    campaign: ''
   });
-  const [donors, setDonors] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [message, setMessage] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchDropdownData = async () => {
+    const fetchCampaigns = async () => {
       try {
-        const donorRes = await axiosInstance.get('/api/donors', {
+        const res = await axiosInstance.get('/api/campaigns', {
           headers: { Authorization: `Bearer ${user.token}` }
         });
-        const campaignRes = await axiosInstance.get('/api/campaigns', {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        setDonors(donorRes.data);
-        setCampaigns(campaignRes.data);
+        setCampaigns(res.data);
       } catch (error) {
-        setMessage('⚠️ Error loading donors or campaigns.');
+        setMessage('⚠️ Error loading campaigns.');
         console.error(error);
       }
     };
 
     if (user?.token) {
-      fetchDropdownData();
+      fetchCampaigns();
     }
   }, [user]);
 
@@ -51,7 +45,7 @@ const DonationForm = ({ onDonationCreated }) => {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMessage('✅ Donation added successfully!');
-      setFormData({ amount: '', donor: '', campaign: '' });
+      setFormData({ amount: '', campaign: '' });
       if (onDonationCreated) onDonationCreated();
     } catch (err) {
       setMessage('❌ Failed to make donation.');
@@ -74,19 +68,6 @@ const DonationForm = ({ onDonationCreated }) => {
         className="w-full border p-2 mb-3 rounded"
         required
       />
-
-      <select
-        name="donor"
-        value={formData.donor}
-        onChange={handleChange}
-        className="w-full border p-2 mb-3 rounded"
-        required
-      >
-        <option value="">Select Donor</option>
-        {donors.map((d) => (
-          <option key={d._id} value={d._id}>{d.name}</option>
-        ))}
-      </select>
 
       <select
         name="campaign"

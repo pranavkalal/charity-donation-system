@@ -1,58 +1,85 @@
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import Navbar from './components/Navbar';
-// import Login from './pages/Login';
-// import Register from './pages/Register';
-// import Profile from './pages/Profile';
-// import Tasks from './pages/Tasks';
-
-// function App() {
-//   return (
-//     <Router>
-//       <Navbar />
-//       <Routes>
-//         <Route path="/login" element={<Login />} />
-//         <Route path="/register" element={<Register />} />
-//         <Route path="/profile" element={<Profile />} />
-//         <Route path="/tasks" element={<Tasks />} />
-//       </Routes>
-//     </Router>
-//   );
-// }
-
-// export default App;
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Tasks from './pages/Tasks';
-
-import Donors from './pages/Donors';
+import Donors from './pages/users';
 import Campaigns from './pages/Campaigns';
 import Donations from './pages/Donations';
 
-function App() {
+import { useAuth } from './context/AuthContext';
+
+const App = () => {
+  const { user } = useAuth();
+
+  // ✅ Wrapper for protected routes
+  const PrivateRoute = ({ children }) => {
+    return user ? children : <Navigate to="/login" />;
+  };
+
   return (
     <Router>
       <Navbar />
       <div className="p-4">
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/tasks" element={<Tasks />} />
+          {/* Redirect based on login status */}
+          <Route path="/" element={<Navigate to={user ? '/users' : '/login'} />} />
 
-          {/* 🚀 New routes for your project */}
-          <Route path="/donors" element={<Donors />} />
-          <Route path="/campaigns" element={<Campaigns />} />
-          <Route path="/donations" element={<Donations />} />
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected routes */}
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <PrivateRoute>
+                <Tasks />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute>
+                <Donors />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/campaigns"
+            element={
+              <PrivateRoute>
+                <Campaigns />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/donations"
+            element={
+              <PrivateRoute>
+                <Donations />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
     </Router>
   );
-}
+};
 
 export default App;
-

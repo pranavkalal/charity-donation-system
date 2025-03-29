@@ -1,11 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { getDonations, getDonationById, createDonation, updateDonation, deleteDonation } = require('../controllers/donationController');
+const { protect } = require('../middleware/authMiddleware');
 
-// GET all donations & POST a new donation
-router.route('/').get(getDonations).post(createDonation);
+const {
+  getDonations,
+  getDonationById,
+  createDonation,
+  updateDonation,
+  deleteDonation,
+  getUserDonations
+} = require('../controllers/donationController');
 
-// GET, PUT, DELETE a donation by ID
+// GET all donations (optional, admin-only) & POST a donation
+router.route('/').get(getDonations).post(protect, createDonation);
+
+// GET current user's donations
+router.get('/my', protect, getUserDonations);
+
+// GET, PUT, DELETE donation by ID
 router.route('/:id').get(getDonationById).put(updateDonation).delete(deleteDonation);
 
 module.exports = router;

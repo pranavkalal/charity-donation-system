@@ -16,7 +16,7 @@ const Login = () => {
     try {
       const response = await axiosInstance.post('/api/auth/login', formData);
       login(response.data); // store user in context + localStorage
-      navigate('/donors'); // redirect to DonorList after login
+      navigate('/users'); // redirect to DonorList after login
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed. Please try again.';
       setError(message);

@@ -1,54 +1,92 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosInstance from '../axiosConfig';
+import { useAuth } from '../context/AuthContext';
 
-const DonorForm = ({ onDonorAdded }) => {
-  const [formData, setFormData] = useState({ name: '', email: '' });
-  const [error, setError] = useState('');
+const DonationForm = ({ onDonationCreated }) => {
+  const [formData, setFormData] = useState({
+    amount: '',
+    campaign: ''
+  });
+  const [campaigns, setCampaigns] = useState([]);
+  const [message, setMessage] = useState('');
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const res = await axiosInstance.get('/api/campaigns', {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setCampaigns(res.data);
+      } catch (error) {
+        setMessage('⚠️ Error loading campaigns.');
+        console.error(error);
+      }
+    };
+
+    if (user?.token) {
+      fetchCampaigns();
+    }
+  }, [user]);
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
+
     try {
-      const response = await axiosInstance.post('/api/donors', formData);
-      setFormData({ name: '', email: '' });
-      setError('');
-      if (onDonorAdded) onDonorAdded(response.data); // Optional callback
+      await axiosInstance.post('/api/donations', formData, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setMessage('✅ Donation added successfully!');
+      setFormData({ amount: '', campaign: '' });
+      if (onDonationCreated) onDonationCreated();
     } catch (err) {
-      setError('Failed to add donor.');
+      setMessage('❌ Failed to make donation.');
+      console.error(err);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4 bg-white p-4 shadow rounded">
-      <h2 className="text-xl font-semibold mb-2">Add Donor</h2>
-      {error && <p className="text-red-600 mb-2">{error}</p>}
+    <form onSubmit={handleSubmit} className="bg-white p-4 shadow-md rounded mb-6">
+      <h2 className="text-lg font-bold mb-3">Make a Donation</h2>
+
+      {message && <p className="mb-3 text-sm text-blue-700">{message}</p>}
+
       <input
-        name="name"
-        value={formData.name}
+        type="number"
+        name="amount"
+        placeholder="Amount"
+        value={formData.amount}
         onChange={handleChange}
-        placeholder="Name"
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full border p-2 mb-3 rounded"
         required
       />
-      <input
-        name="email"
-        value={formData.email}
+
+      <select
+        name="campaign"
+        value={formData.campaign}
         onChange={handleChange}
-        placeholder="Email"
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full border p-2 mb-3 rounded"
         required
-      />
-      <button
-        type="submit"
-        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
       >
-        Submit
+        <option value="">Select Campaign</option>
+        {campaigns.map((c) => (
+          <option key={c._id} value={c._id}>{c.title}</option>
+        ))}
+      </select>
+
+      <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+        Donate
       </button>
     </form>
   );
 };
 
-export default DonorForm;
+export default DonationForm;
