@@ -21,10 +21,10 @@ describe('Donation Controller', () => {
     const req = {
       body: {
         amount: 100,
-        campaign: new mongoose.Types.ObjectId()  // required
+        campaign: new mongoose.Types.ObjectId()  
       },
       user: {
-        id: new mongoose.Types.ObjectId()        // mocked auth
+        id: new mongoose.Types.ObjectId()        
       }
     };
     const res = { status: sinon.stub().returnsThis(), json: sinon.spy() };

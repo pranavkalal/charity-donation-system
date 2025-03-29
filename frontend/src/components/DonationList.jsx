@@ -13,10 +13,18 @@ const DonationList = () => {
         const res = await axiosInstance.get('/api/donations', {
           headers: { Authorization: `Bearer ${user.token}` },
         });
-        setDonations(res.data);
+
+        if (Array.isArray(res.data)) {
+          setDonations(res.data);
+        } else {
+          console.warn('Unexpected response:', res.data);
+          setDonations([]); // fallback to empty array
+        }
+
       } catch (err) {
         setError('Failed to fetch donations.');
-        console.error(err);
+        console.error('❌ Donation fetch failed:', err);
+        setDonations([]); // safety fallback
       }
     };
 
@@ -39,19 +47,19 @@ const DonationList = () => {
       {error && <p className="text-red-600">{error}</p>}
 
       <ul className="divide-y">
-        {donations.length === 0 ? (
+        {Array.isArray(donations) && donations.length === 0 ? (
           <li className="py-2 text-gray-500">No donations found.</li>
         ) : (
-          donations.map((donation) => (
+          Array.isArray(donations) && donations.map((donation) => (
             <li key={donation._id} className="py-3">
               <p>
-                 <strong>${donation.amount}</strong>{' '}
+                <strong>${donation.amount}</strong>{' '}
                 by <em>{donation?.donor?.name || 'Unknown Donor'}</em>{' '}
                 to <strong>{donation?.campaign?.title || 'Untitled Campaign'}</strong>
               </p>
               {donation.date && (
                 <p className="text-sm text-gray-500">
-                   {formatDate(donation.date)}
+                  {formatDate(donation.date)}
                 </p>
               )}
             </li>

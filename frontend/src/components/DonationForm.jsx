@@ -77,9 +77,11 @@ const DonationForm = ({ onDonationCreated }) => {
         required
       >
         <option value="">Select Campaign</option>
-        {campaigns.map((c) => (
-          <option key={c._id} value={c._id}>{c.title}</option>
-        ))}
+        {Array.isArray(campaigns) && campaigns.map(c => (
+  <option key={c._id} value={c._id}>
+    {c.title}
+  </option>
+))}
       </select>
 
       <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
