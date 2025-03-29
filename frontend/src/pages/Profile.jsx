@@ -102,7 +102,7 @@ import axiosInstance from '../axiosConfig';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
