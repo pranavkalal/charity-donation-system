@@ -23,7 +23,7 @@ const DonationList = () => {
 
       } catch (err) {
         setError('Failed to fetch donations.');
-        console.error('❌ Donation fetch failed:', err);
+        console.error(' Donation fetch failed:', err);
         setDonations([]); // safety fallback
       }
     };

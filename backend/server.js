@@ -12,18 +12,18 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ✅ Routes FIRST
+//Routes 
 app.use('/api/auth', require('./routes/authRoutes'));        
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/campaigns', require('./routes/campaignRoutes'));
 app.use('/api/donations', require('./routes/donationRoutes')); 
 
-// ✅ Then serve frontend
+// frontend
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
 });
 
-// ✅ Start server
+//Start server
 const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
