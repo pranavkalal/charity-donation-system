@@ -29,12 +29,12 @@ const CampaignForm = ({ onCampaignCreated }) => {
       await axiosInstance.post('/api/campaigns', formData, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      setSuccess('✅ Campaign created successfully!');
+      setSuccess(' Campaign created successfully!');
       setFormData({ title: '', description: '', goalAmount: '' });
       if (onCampaignCreated) onCampaignCreated();
     } catch (err) {
       console.error(err);
-      setError('❌ Failed to create campaign.');
+      setError(' Failed to create campaign.');
     }
   };
 

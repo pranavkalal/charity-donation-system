@@ -8,7 +8,7 @@ const CampaignList = ({ onEdit, onDelete }) => {
     const fetchCampaigns = async () => {
       try {
         const data = await getCampaigns();
-        console.log('✅ Fetched campaigns:', data);
+        console.log(' Fetched campaigns:', data);
         if (Array.isArray(data)) {
           setCampaigns(data);
         } else {
@@ -42,11 +42,11 @@ const CampaignList = ({ onEdit, onDelete }) => {
           <div key={campaign._id} className="mb-4 pb-2 border-b">
             <h3 className="font-semibold">{campaign.title}</h3>
             <p className="text-sm text-gray-600">{campaign.description}</p>
-            <p className="mt-1">🎯 Goal: ${campaign.goal}</p>
+            <p className="mt-1">🎯 Goal: ${campaign.goalAmount}</p>
             <div className="mt-2 space-x-2">
               <button
                 className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                onClick={() => onEdit(campaign)}
+                onClick={() => onEdit(campaign._id)}
               >
                 Edit
               </button>
