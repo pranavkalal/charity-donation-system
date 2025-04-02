@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
-import Tasks from './pages/Tasks';
+// import Tasks from './pages/Tasks';
 import Donors from './pages/users';
 import Campaigns from './pages/Campaigns';
 import Donations from './pages/Donations';
@@ -41,14 +41,7 @@ const App = () => {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/tasks"
-            element={
-              <PrivateRoute>
-                <Tasks />
-              </PrivateRoute>
-            }
-          />
+          
           <Route
             path="/users"
             element={
