@@ -3,7 +3,7 @@ name: Backend CI
 on:
   push:
     branches:
-      - main  # Trigger CI 
+      - main  # Trigger self hosted runner
 
 jobs:
   test:
