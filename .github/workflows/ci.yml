@@ -3,7 +3,7 @@ name: Backend CI
 on:
   push:
     branches:
-      - main  # Trigger CI on pushes to the main branch
+      - main  # Trigger CI 
 
 jobs:
   test:
