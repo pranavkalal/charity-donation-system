@@ -9,6 +9,8 @@ import Profile from './pages/Profile';
 import Donors from './pages/users';
 import Campaigns from './pages/Campaigns';
 import Donations from './pages/Donations';
+import CreateCampaign from './pages/CreateCampaign';
+
 
 import { useAuth } from './context/AuthContext';
 
@@ -66,6 +68,15 @@ const App = () => {
               </PrivateRoute>
             }
           />
+          <Route
+  path="/admin/create-campaign"
+  element={
+    <PrivateRoute>
+      <CreateCampaign />
+    </PrivateRoute>
+  }
+/>
+
 
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
