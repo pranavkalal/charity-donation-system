@@ -1,24 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const {
-  getCampaigns,
-  getCampaignById,
-  createCampaign,
-  updateCampaign,
-  deleteCampaign,
-} = require('../controllers/campaignController');
+const mongoose = require("mongoose");
 
-const { protect } = require('../middleware/authMiddleware');
-const { adminOnly } = require('../middleware/adminMiddleware');
+const campaignSchema = new mongoose.Schema({
+  title: { type: String, required: true, trim: true },
+  description: { type: String, required: true },
+  goalAmount: { type: Number, required: true },
+  raisedAmount: { type: Number, default: 0 },
+  currency: { type: String, default: "USD" },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
+  mediaUrl: { type: String }
+}, { timestamps: true });
 
-// Public routes
-router.route('/').get(getCampaigns);
-router.route('/:id').get(getCampaignById);
-
-// Admin-only routes
-router.route('/').post(protect, adminOnly, createCampaign);
-router.route('/:id')
-  .put(protect, adminOnly, updateCampaign)
-  .delete(protect, adminOnly, deleteCampaign);
-
-module.exports = router;
+module.exports = mongoose.model("Campaign", campaignSchema);
