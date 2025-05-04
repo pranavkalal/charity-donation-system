@@ -11,6 +11,8 @@ const CampaignForm = ({ onCampaignCreated }) => {
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { user } = useAuth();
 
   const handleChange = (e) => {
@@ -24,17 +26,29 @@ const CampaignForm = ({ onCampaignCreated }) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setIsSubmitting(true);
+
+    // Optional: validate goal amount
+    if (Number(formData.goalAmount) <= 0) {
+      setError('Goal amount must be greater than 0.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       await axiosInstance.post('/api/campaigns', formData, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      setSuccess(' Campaign created successfully!');
+
+      setSuccess('Campaign created successfully!');
       setFormData({ title: '', description: '', goalAmount: '' });
+
       if (onCampaignCreated) onCampaignCreated();
     } catch (err) {
       console.error(err);
-      setError(' Failed to create campaign.');
+      setError('Failed to create campaign.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -74,8 +88,12 @@ const CampaignForm = ({ onCampaignCreated }) => {
         required
       />
 
-      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Create Campaign
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        {isSubmitting ? 'Creating...' : 'Create Campaign'}
       </button>
     </form>
   );

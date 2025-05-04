@@ -8,10 +8,17 @@ const {
   deleteCampaign,
 } = require('../controllers/campaignController');
 
-// GET all campaigns & POST a new campaign
-router.route('/').get(getCampaigns).post(createCampaign);
+const { protect } = require('../middleware/authMiddleware');
+const { adminOnly } = require('../middleware/adminMiddleware');
 
-// GET, PUT, DELETE a campaign by ID
-router.route('/:id').get(getCampaignById).put(updateCampaign).delete(deleteCampaign);
+// Public routes
+router.route('/').get(getCampaigns);
+router.route('/:id').get(getCampaignById);
+
+// Admin-only routes
+router.route('/').post(protect, adminOnly, createCampaign);
+router.route('/:id')
+  .put(protect, adminOnly, updateCampaign)
+  .delete(protect, adminOnly, deleteCampaign);
 
 module.exports = router;
