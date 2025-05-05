@@ -20,7 +20,7 @@ const AdminDashboard = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-[#0d0e1c]">Welcome, Admin</h1>
           <button
-            onClick={() => navigate('/create-campaign')}
+            onClick={() => navigate('/admin/create-campaign')}
             className="bg-[#dfe1f1] text-[#0d0e1c] px-4 py-2 rounded-full font-semibold text-sm hover:bg-[#e2e4f2]"
           >
             + Create Campaign
