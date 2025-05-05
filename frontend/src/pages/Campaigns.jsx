@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CampaignForm from '../components/CampaignForm';
+// import CampaignForm from '../components/CampaignForm';
 import CampaignList from '../components/CampaignList';
 
 const Campaigns = () => {
@@ -13,10 +13,10 @@ const Campaigns = () => {
 
   return (
     <div className="max-w-2xl mx-auto mt-8">
-      <CampaignForm
+      {/* <CampaignForm
         onSuccess={handleCampaignCreatedOrUpdated}
         editingCampaign={editingCampaign}
-      />
+      /> */}
       <CampaignList
         key={refresh}
         onEdit={(campaign) => setEditingCampaign(campaign)}

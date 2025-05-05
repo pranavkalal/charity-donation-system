@@ -1,25 +1,23 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
+import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
-// import Tasks from './pages/Tasks';
 import Donors from './pages/users';
 import Campaigns from './pages/Campaigns';
 import Donations from './pages/Donations';
 import CreateCampaign from './pages/CreateCampaign';
-
 
 import { useAuth } from './context/AuthContext';
 
 const App = () => {
   const { user } = useAuth();
 
-  // ✅ Wrapper for protected routes
+  // ✅ TEMPORARY BYPASS FOR TESTING
   const PrivateRoute = ({ children }) => {
-    return user ? children : <Navigate to="/login" />;
+    return children; // Disable login check just for testing
   };
 
   return (
@@ -34,7 +32,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Protected routes */}
+          {/* Protected (but currently bypassed) routes */}
           <Route
             path="/profile"
             element={
@@ -43,7 +41,7 @@ const App = () => {
               </PrivateRoute>
             }
           />
-          
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route
             path="/users"
             element={
@@ -69,14 +67,13 @@ const App = () => {
             }
           />
           <Route
-  path="/admin/create-campaign"
-  element={
-    <PrivateRoute>
-      <CreateCampaign />
-    </PrivateRoute>
-  }
-/>
-
+            path="/admin/create-campaign"
+            element={
+              <PrivateRoute>
+                <CreateCampaign />
+              </PrivateRoute>
+            }
+          />
 
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
