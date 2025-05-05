@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
+import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -41,6 +41,7 @@ const App = () => {
               </PrivateRoute>
             }
           />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route
             path="/users"
             element={
