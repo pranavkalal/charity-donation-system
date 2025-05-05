@@ -1,65 +1,59 @@
 import React, { useEffect, useState } from 'react';
-import { getCampaigns, deleteCampaign } from '../api/campaignAPI';
+import { getCampaigns } from '../api/campaignAPI';
+import { useNavigate } from 'react-router-dom';
 
-const CampaignList = ({ onEdit, onDelete }) => {
+const CampaignList = () => {
   const [campaigns, setCampaigns] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
         const data = await getCampaigns();
-        console.log(' Fetched campaigns:', data);
-        if (Array.isArray(data)) {
-          setCampaigns(data);
-        } else {
-          console.error('Expected an array but got:', typeof data, data);
-          setCampaigns([]); // fallback to empty array
-        }
+        setCampaigns(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error fetching campaigns:', error);
-        setCampaigns([]); // fallback on error
+        setCampaigns([]);
       }
     };
-
     fetchCampaigns();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this campaign?')) {
-      await deleteCampaign(id);
-      onDelete(); // trigger refresh in parent
-    }
-  };
-
   return (
-    <div className="bg-white p-6 rounded shadow-md">
-      <h2 className="text-xl font-bold mb-4">Campaigns</h2>
+    <div className="min-h-screen bg-[#f5f5fa] px-12 py-4"> {/* reduced py */}
+      <h1 className="text-4xl font-bold text-[#242067] mb-8 mt-2">Campaigns</h1> {/* optional mt-2 added */}
 
-      {campaigns.length === 0 ? (
-        <p className="text-gray-500">No campaigns available.</p>
-      ) : (
-        campaigns.map((campaign) => (
-          <div key={campaign._id} className="mb-4 pb-2 border-b">
-            <h3 className="font-semibold">{campaign.title}</h3>
-            <p className="text-sm text-gray-600">{campaign.description}</p>
-            <p className="mt-1">🎯 Goal: ${campaign.goalAmount}</p>
-            <div className="mt-2 space-x-2">
-              <button
-                className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                onClick={() => onEdit(campaign)}
-              >
-                Edit
-              </button>
-              <button
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                onClick={() => handleDelete(campaign._id)}
-              >
-                Delete
-              </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {campaigns.map((item) => (
+          <div
+            key={item._id}
+            className="flex bg-white p-6 rounded-xl shadow-sm items-center border border-transparent hover:border-blue-400 transition"
+          >
+            <img
+              src={item.image}
+              alt={item.title}
+              className="w-40 h-40 object-cover rounded-md mr-6"
+            />
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold text-blue-900">{item.title}</h2>
+              <p className="text-sm text-gray-600">
+                {item.description || 'write your text here write your text here write'}
+              </p>
+              <div className="flex justify-between items-center mt-4">
+                <span className="text-lg font-bold">
+                  ${item.amount || 20}
+                </span>
+                <button
+                  onClick={() => navigate(`/campaigns/${item._id}`)}
+                  className="bg-blue-900 text-white px-4 py-1 rounded-md"
+                >
+                  Donate
+                </button>
+              </div>
             </div>
           </div>
-        ))
-      )}
+        ))}
+      </div>
     </div>
   );
 };

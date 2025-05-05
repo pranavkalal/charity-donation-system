@@ -19,3 +19,9 @@ export const deleteCampaign = async (id) => {
   const response = await axios.delete(`/api/campaigns/${id}`);
   return response.data;
 };
+
+export const getCampaignById = async (id) => {
+  const response = await axios.get(`/api/campaigns/${id}`);
+  return response.data;
+};
+

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// import CampaignForm from '../components/CampaignForm';
 import CampaignList from '../components/CampaignList';
 
 const Campaigns = () => {
@@ -7,16 +6,12 @@ const Campaigns = () => {
   const [editingCampaign, setEditingCampaign] = useState(null);
 
   const handleCampaignCreatedOrUpdated = () => {
-    setEditingCampaign(null);      // Reset editing state
-    setRefresh(!refresh);          // Trigger re-render
+    setEditingCampaign(null);
+    setRefresh(!refresh);
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-8">
-      {/* <CampaignForm
-        onSuccess={handleCampaignCreatedOrUpdated}
-        editingCampaign={editingCampaign}
-      /> */}
+    <div className="w-full px-8 py-8">
       <CampaignList
         key={refresh}
         onEdit={(campaign) => setEditingCampaign(campaign)}
