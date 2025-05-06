@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 const MockPaymentForm = () => {
-  const { id } = useParams(); // ✅ Using ID from route
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [amount, setAmount] = useState("20");
@@ -27,14 +27,13 @@ const MockPaymentForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-gray-50 py-8 px-4">
-      <h1 className="text-4xl font-bold text-[#242067] mb-10">Donate Now</h1>
+    <div className="min-h-screen flex flex-col items-center justify-start  py-8 px-4">
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white w-full max-w-xl rounded-xl shadow p-6 space-y-6"
+        className="bg-white w-full max-w-xl rounded-xl shadow-md p-6 space-y-6"
       >
-        {/* Donation Amount */}
+      
         <div>
           <label className="block text-gray-800 font-medium mb-2">
             How much would you like to donate?
@@ -62,7 +61,6 @@ const MockPaymentForm = () => {
           </div>
         </div>
 
-        {/* Payment Method */}
         <div>
           <label className="block text-gray-800 font-medium mb-2">
             How would you like to pay?
@@ -83,7 +81,6 @@ const MockPaymentForm = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-between items-center pt-4">
           <button
             type="button"

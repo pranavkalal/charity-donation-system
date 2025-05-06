@@ -11,6 +11,7 @@ import Donations from './pages/Donations';
 import CreateCampaign from './pages/CreateCampaign';
 import CampaignDesc from "./components/CampaignDesc"; 
 import MockPaymentForm from "./components/MockPaymentForm"
+import Footer from './components/Footer';
 
 
 import { useAuth } from './context/AuthContext';
@@ -26,7 +27,7 @@ const App = () => {
   return (
     <Router>
       <Navbar />
-      <div className="w-screen px-8 py-10">
+      <div className="w-screen px-8 pt-0 pb-6">
         <Routes>
           {/* Redirect based on login status */}
           <Route path="/" element={<Navigate to={user ? '/users' : '/login'} />} />
@@ -84,6 +85,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
+      <Footer /> 
     </Router>
   );
 };
