@@ -14,34 +14,41 @@ const Navbar = () => {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
-      <Link to="/" className="text-2xl font-bold">CharityApp</Link>
-      
-      {!user && isAuthPage && (
-        <div>
-          <Link
-            to="/register"
-            className="bg-green-500 px-3 py-1 rounded hover:bg-green-700"
-          >
-            Register
+    <div className="w-full px-6 pt-6 pb-4">
+      <nav className="flex justify-between items-center px-6 py-3 w-full bg-white rounded-2xl shadow-md">
+        <div className="flex items-center gap-8">
+          <Link to="/" className="mr-2">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/51ca0c4924b8bfb92cbbe4a82d80243e7d8ce83d?placeholderIfAbsent=true&apiKey=25764a6927e6464da1bc6d0860af1c32"
+              className="object-contain w-10"
+              alt="Logo"
+            />
           </Link>
+          <Link to="/" className="text-gray-800 hover:text-indigo-600 text-base">Home</Link>
+          {user && (
+            <>
+              <Link to="/campaigns" className="text-gray-800 hover:text-indigo-600 text-base">Campaigns</Link>
+              <Link to="/beneficiaries" className="text-gray-800 hover:text-indigo-600 text-base">Beneficiary</Link>
+              <Link to="/leaderboard" className="text-gray-800 hover:text-indigo-600 text-base">Donor Leaderboard</Link>
+            </>
+          )}
         </div>
-      )}
 
-      {user && (
-        <div className="flex items-center space-x-4">
-          <Link to="/users">Profile</Link>
-          <Link to="/campaigns">Campaigns</Link>
-          <Link to="/donations">Donations</Link>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 px-3 py-1 rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
+        <div className="flex items-center gap-6">
+          {!user && isAuthPage && (
+            <Link to="/register" className="text-gray-800 hover:text-indigo-600 text-base">Register</Link>
+          )}
+          {user ? (
+            <>
+              <Link to="/profile" className="text-gray-800 hover:text-indigo-600 text-base">My Profile</Link>
+              <button onClick={handleLogout} className="text-gray-800 hover:text-indigo-600 text-base">Logout</button>
+            </>
+          ) : !isAuthPage && (
+            <Link to="/login" className="text-gray-800 hover:text-indigo-600 text-base">Login</Link>
+          )}
         </div>
-      )}
-    </nav>
+      </nav>
+    </div>
   );
 };
 
