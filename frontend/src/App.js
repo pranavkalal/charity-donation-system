@@ -26,7 +26,7 @@ const App = () => {
   return (
     <Router>
       <Navbar />
-      <div className="w-screen min-h-screen bg-[#f5f5fa] px-8 py-10">
+      <div className="w-screen px-8 py-10">
         <Routes>
           {/* Redirect based on login status */}
           <Route path="/" element={<Navigate to={user ? '/users' : '/login'} />} />
