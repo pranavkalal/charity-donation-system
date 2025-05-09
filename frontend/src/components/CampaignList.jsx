@@ -27,7 +27,7 @@ const CampaignList = () => {
         {campaigns.map((item) => (
           <div
             key={item._id}
-            className="flex bg-white p-6 rounded-xl shadow-sm items-center border border-transparent hover:border-blue-400 transition"
+            className="flex bg-white p-6 rounded-xl shadow-md items-center border border-transparent hover:border-blue-400 transition"
           >
             <img
               src={item.image}
