@@ -5,7 +5,7 @@ import FaPaperPlane from '../icons/FaPaperPlane.png';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#f5f5fa] border-t border-gray mt-16 py-6">
+    <footer className="bg-[#f5f5fa] border-t border-gray py-6">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
 
         {/* Icons as images */}

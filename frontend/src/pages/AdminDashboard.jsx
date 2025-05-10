@@ -1,17 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminSummaryCard from '../components/AdminSummaryCard';
 import AdminCampaignTable from '../components/AdminCampaignTable';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../axiosConfig';
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const campaigns = [
-    { name: 'Campaign 1', goal: '-', raised: '500', status: 'Active' },
-    { name: 'Campaign 2', goal: '-', raised: '1000', status: 'Inactive' },
-    { name: 'Campaign 3', goal: '-', raised: '-', status: 'Active' }
-  ];
+  const [campaigns, setCampaigns] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const res = await axiosInstance.get('/api/campaigns', {
+          headers: {
+            Authorization: `Bearer ${user.token}`
+          }
+        });
+        setCampaigns(res.data);
+      } catch (err) {
+        console.error('Failed to fetch campaigns:', err);
+        setError('Could not load campaigns.');
+      }
+    };
+
+    fetchCampaigns();
+  }, [user.token]);
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm('Are you sure you want to delete this campaign?');
+    if (!confirmed) return;
+
+    try {
+      await axiosInstance.delete(`/api/campaigns/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setCampaigns(prev => prev.filter(c => c._id !== id));
+    } catch (err) {
+      console.error('Failed to delete campaign:', err);
+    }
+  };
+
+  const handleEdit = (campaign) => {
+    navigate('/admin/create-campaign', { state: { campaign } });
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f1f2f9] font-['Plus Jakarta Sans','Noto Sans',sans-serif]">
@@ -28,8 +64,8 @@ const AdminDashboard = () => {
         </div>
 
         <div className="flex gap-4 mb-6">
-          <AdminSummaryCard label="Total Campaigns" value="3" />
-          <AdminSummaryCard label="Total Donations" value="$1500" />
+          <AdminSummaryCard label="Total Campaigns" value={campaigns.length} />
+          <AdminSummaryCard label="Total Donations" value={`$${campaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0)}`} />
           <AdminSummaryCard label="Total Donors" value="2" />
         </div>
 
@@ -37,12 +73,18 @@ const AdminDashboard = () => {
           <label className="block text-[#0d0e1c] font-medium mb-2">Filter Campaigns</label>
           <select className="w-full max-w-xs p-3 border border-[#cacde7] rounded-xl bg-white">
             <option value="">Select filter</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
           </select>
         </div>
 
-        <AdminCampaignTable campaigns={campaigns} />
+        {error && <p className="text-red-600">{error}</p>}
+
+        <AdminCampaignTable
+          campaigns={campaigns}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
       </main>
     </div>
   );
