@@ -12,16 +12,26 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     try {
       const response = await axiosInstance.post('/api/auth/login', formData);
-      login(response.data); // store user in context + localStorage
-      navigate('/users'); // redirect to DonorList after login
+      const { id, name, email, token, isAdmin } = response.data;
+  
+      // Save user to context and localStorage
+      login({ id, name, email, token, isAdmin });
+  
+      // Redirect based on admin status
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/users');
+      }
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed. Please try again.';
       setError(message);
     }
   };
+  
 
   return (
     <div className="max-w-md mx-auto mt-20">

@@ -45,7 +45,15 @@ const App = () => {
               </PrivateRoute>
             }
           />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route
+  path="/admin"
+  element={
+    <PrivateRoute>
+      {user?.isAdmin ? <AdminDashboard /> : <Navigate to="/" />}
+    </PrivateRoute>
+  }
+/>
+
           <Route
             path="/users"
             element={
@@ -71,13 +79,14 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/create-campaign"
-            element={
-              <PrivateRoute>
-                <CreateCampaign />
-              </PrivateRoute>
-            }
-          />
+  path="/admin/create-campaign"
+  element={
+    <PrivateRoute>
+      {user?.isAdmin ? <CreateCampaign /> : <Navigate to="/" />}
+    </PrivateRoute>
+  }
+/>
+
           <Route path="/campaigns/:id" element={<CampaignDesc />} />
           <Route path="/campaigns/:id/payment" element={<MockPaymentForm />} />
 
