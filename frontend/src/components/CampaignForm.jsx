@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-const CampaignForm = ({ onCampaignCreated }) => {
+const CampaignForm = ({ initialData = null, onCampaignCreated }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isEdit = !!initialData;
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -13,14 +18,30 @@ const CampaignForm = ({ onCampaignCreated }) => {
     status: 'Active',
     mediaUrl: ''
   });
+
   const [imagePreview, setImagePreview] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const { user } = useAuth();
+
+  useEffect(() => {
+    if (isEdit) {
+      setFormData({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        goalAmount: initialData.goalAmount || '',
+        currency: initialData.currency || 'USD',
+        startDate: initialData.startDate?.slice(0, 10) || '',
+        endDate: initialData.endDate?.slice(0, 10) || '',
+        status: initialData.status || 'Active',
+        mediaUrl: initialData.mediaUrl || ''
+      });
+      setImagePreview(initialData.mediaUrl || '');
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
@@ -29,7 +50,7 @@ const CampaignForm = ({ onCampaignCreated }) => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, mediaUrl: reader.result }));
+      setFormData(prev => ({ ...prev, mediaUrl: reader.result }));
       setImagePreview(reader.result);
     };
     reader.readAsDataURL(file);
@@ -39,19 +60,34 @@ const CampaignForm = ({ onCampaignCreated }) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
     try {
-      await axiosInstance.post('/api/campaigns', formData, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      setSuccess('✅ Campaign created successfully!');
-      setFormData({
-        title: '', description: '', goalAmount: '', currency: 'USD',
-        startDate: '', endDate: '', status: 'Active', mediaUrl: ''
-      });
-      setImagePreview('');
-      onCampaignCreated?.();
+      if (isEdit) {
+        await axiosInstance.put(`/api/campaigns/${initialData._id}`, formData, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setSuccess('✅ Campaign updated successfully!');
+        setTimeout(() => navigate('/admin'), 1000);
+      } else {
+        await axiosInstance.post('/api/campaigns', formData, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setSuccess('✅ Campaign created successfully!');
+        setFormData({
+          title: '',
+          description: '',
+          goalAmount: '',
+          currency: 'USD',
+          startDate: '',
+          endDate: '',
+          status: 'Active',
+          mediaUrl: ''
+        });
+        setImagePreview('');
+        onCampaignCreated?.();
+      }
     } catch {
-      setError('❌ Failed to create campaign.');
+      setError(`❌ Failed to ${isEdit ? 'update' : 'create'} campaign.`);
     }
   };
 
@@ -170,7 +206,7 @@ const CampaignForm = ({ onCampaignCreated }) => {
         type="submit"
         className="w-full bg-[#1c2480] text-white py-3 rounded-xl font-bold hover:bg-[#1a1f70] transition"
       >
-        Create campaign
+        {isEdit ? 'Update Campaign' : 'Create Campaign'}
       </button>
 
       {error && <p className="text-red-600 mt-3">{error}</p>}
