@@ -1,8 +1,9 @@
 import axios from '../axiosConfig';
 
+
 export const getCampaigns = async () => {
   const response = await axios.get('/api/campaigns');
-  return response.data; // ✅ this is what CampaignList expects
+  return response.data; 
 };
 
 export const createCampaign = async (data) => {

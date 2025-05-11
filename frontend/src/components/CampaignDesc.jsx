@@ -5,35 +5,48 @@ import { getCampaignById } from "../api/campaignAPI";
 const CampaignDesc = () => {
   const { id } = useParams();
   const [campaign, setCampaign] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
         const data = await getCampaignById(id);
+        console.log("Fetched campaign:", data);
         setCampaign(data);
       } catch (error) {
         console.error("Error fetching campaign:", error);
-        setCampaign(null);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCampaign();
   }, [id]);
 
+  if (loading) {
+    return <div className="p-10 text-gray-600 text-lg">Loading campaign...</div>;
+  }
+
   if (!campaign) {
     return <div className="p-10 text-red-500 text-lg">Campaign not found.</div>;
   }
 
-  const { title, image, about, goalAmount, raisedAmount } = campaign;
-  const percent = Math.min((raisedAmount / goalAmount) * 100, 100).toFixed(0);
+  const {
+    title = "Untitled Campaign",
+    mediaUrl,
+    description = "No details provided yet.",
+    goalAmount = 0,
+    raisedAmount = 0,
+  } = campaign;
+
+  const percent = goalAmount > 0 ? Math.min((raisedAmount / goalAmount) * 100, 100).toFixed(0) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10">
-      
       {/* Banner Image with Title */}
       <div className="w-full max-w-4xl px-4">
         <div className="relative w-full h-72 rounded-xl overflow-hidden shadow">
           <img
-            src={image}
+            src={mediaUrl || "https://via.placeholder.com/600x300?text=No+Image"}
             alt={title}
             className="object-cover w-full h-full"
           />
@@ -56,14 +69,14 @@ const CampaignDesc = () => {
       {/* About Section */}
       <div className="w-full max-w-4xl bg-white px-6 py-4 mt-8 rounded-lg shadow">
         <h2 className="text-2xl font-semibold text-gray-800 mb-2">About This Campaign</h2>
-        <p className="text-gray-700">{about || "No details provided yet."}</p>
+        <p className="text-gray-700">{description}</p>
       </div>
 
       {/* Progress Section */}
       <div className="w-full max-w-4xl bg-white px-6 py-4 mt-6 rounded-lg shadow">
         <div className="flex justify-between text-sm text-gray-600 mb-2">
-          <span>Raised: ${raisedAmount}</span>
-          <span>Goal: ${goalAmount}</span>
+          <span>Raised: ${raisedAmount.toLocaleString()}</span>
+          <span>Goal: ${goalAmount.toLocaleString()}</span>
         </div>
         <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden">
           <div

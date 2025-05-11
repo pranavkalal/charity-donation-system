@@ -12,9 +12,9 @@
     "concurrently": "^7.0.0",
     "mocha": "^11.0.1"
   },
-
-
   "author": "Task Manager Team",
-  "license": "ISC"
-  
+  "license": "ISC",
+  "dependencies": {
+    "react-router-dom": "^7.6.0"
+  }
 }
