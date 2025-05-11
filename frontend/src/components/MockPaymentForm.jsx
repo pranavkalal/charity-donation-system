@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const MockPaymentForm = () => {
   const { id } = useParams();
@@ -19,21 +20,33 @@ const MockPaymentForm = () => {
     setCustomAmount(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const finalAmount = amount || customAmount;
-    alert(`✅ You donated $${finalAmount} to campaign ID: ${id} via ${paymentMethod}`);
-    navigate(`/campaigns/${id}`);
+    const finalAmount = parseFloat(amount || customAmount);
+
+    if (isNaN(finalAmount) || finalAmount <= 0) {
+      alert("Please enter a valid donation amount.");
+      return;
+    }
+
+    try {
+      await axios.post(`/api/campaigns/${id}/donate`, {
+        amount: finalAmount,
+      });
+      alert(`✅ You donated $${finalAmount} to campaign ID: ${id} via ${paymentMethod}`);
+      navigate(`/campaigns/${id}`);
+    } catch (error) {
+      console.error("Donation failed:", error);
+      alert("❌ Donation failed. Please try again later.");
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start  py-8 px-4">
-
+    <div className="min-h-screen flex flex-col items-center justify-start py-8 px-4">
       <form
         onSubmit={handleSubmit}
         className="bg-white w-full max-w-xl rounded-xl shadow-md p-6 space-y-6"
       >
-      
         <div>
           <label className="block text-gray-800 font-medium mb-2">
             How much would you like to donate?
