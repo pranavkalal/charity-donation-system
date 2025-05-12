@@ -9,8 +9,9 @@ import calendarIcon from '../icons/calendar_icon.png';
 import donationsIcon from '../icons/donations_icon.png';
 import clockIcon from '../icons/clock_icon.png';
 
+// Main Profile component
 const Profile = () => {
-  // For demo purposes
+  // User state (currently mocked for demo purposes)
   const [user, setUser] = useState({ token: 'demo-token' });
 
   return (
@@ -21,6 +22,7 @@ const Profile = () => {
   );
 };
 
+// Component to show and edit personal information
 const PersonalInformation = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -31,12 +33,14 @@ const PersonalInformation = () => {
     memberSince: '6/15/2023'
   });
 
+  // Handles form submission (e.g., save changes)
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsEditing(false);
     // This would normally call an API
   };
 
+  // Edit mode UI
   if (isEditing) {
     return (
       <section className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -110,6 +114,7 @@ const PersonalInformation = () => {
     );
   }
 
+  // View mode UI
   return (
     <section className="bg-white rounded-lg shadow-md p-6 mb-6">
       <header className="flex justify-between items-center mb-4">
@@ -194,6 +199,7 @@ const PersonalInformation = () => {
   );
 };
 
+// Component to display donation-related information
 const DonationSummary = () => {
   const [donationData, setDonationData] = useState({
     totalDonated: "$1000.00",
