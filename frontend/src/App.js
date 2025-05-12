@@ -12,6 +12,7 @@ import CreateCampaign from './pages/CreateCampaign';
 import CampaignDesc from "./components/CampaignDesc"; 
 import MockPaymentForm from "./components/MockPaymentForm"
 import Footer from './components/Footer';
+import DonorLeaderboard from "./pages/DonorLeaderboard";
 
 
 import { useAuth } from './context/AuthContext';
@@ -79,12 +80,20 @@ const App = () => {
             }
           />
           <Route
-  path="/admin/create-campaign"
-  element={
-    <PrivateRoute>
-      {user?.isAdmin ? <CreateCampaign /> : <Navigate to="/" />}
-    </PrivateRoute>
-  }
+            path="/leaderboard"
+            element={
+              <PrivateRoute>
+                <DonorLeaderboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/create-campaign"
+            element={
+              <PrivateRoute>
+                {user?.isAdmin ? <CreateCampaign /> : <Navigate to="/" />}
+              </PrivateRoute>
+            }
 />
 
           <Route path="/campaigns/:id" element={<CampaignDesc />} />
