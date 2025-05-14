@@ -9,6 +9,7 @@ const MockPaymentForm = () => {
   const [amount, setAmount] = useState("20");
   const [customAmount, setCustomAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Stripe");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAmountChange = (value) => {
     setAmount(value);
@@ -22,6 +23,8 @@ const MockPaymentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsProcessing(true);
+
     const finalAmount = parseFloat(amount || customAmount);
 
     if (isNaN(finalAmount) || finalAmount <= 0) {
@@ -30,14 +33,38 @@ const MockPaymentForm = () => {
     }
 
     try {
-      await axios.post(`/api/campaigns/${id}/donate`, {
+      // Get auth token from localStorage
+      const userData = JSON.parse(localStorage.getItem('user'));
+
+      if (!userData || !userData.token) {
+        alert("You need to be logged in to make a donation.");
+        navigate('/login', { state: { from: `/campaigns/${id}` } });
+        return;
+      }
+
+      // Include auth token in request
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userData.token}`
+        }
+      };
+
+      const response = await axios.post(`/api/campaigns/${id}/donate`, {
         amount: finalAmount,
-      });
-      alert(`✅ You donated $${finalAmount} to campaign ID: ${id} via ${paymentMethod}`);
+      },config);
+
+      console.log('Donation response:', response.data);
+
+      alert(`✅ Thank you! You donated $${finalAmount} to campaign ID: ${id} via ${paymentMethod}`);
+      
+      // Navigate back to campaign page
       navigate(`/campaigns/${id}`);
     } catch (error) {
       console.error("Donation failed:", error);
       alert("❌ Donation failed. Please try again later.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -104,9 +131,11 @@ const MockPaymentForm = () => {
           </button>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+            disabled={isProcessing}
+            className={`${isProcessing ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+              } text-white px-6 py-2 rounded-md`}
           >
-            Pay with {paymentMethod}
+            {isProcessing ? 'Processing...' : `Pay with ${paymentMethod}`}
           </button>
         </div>
       </form>
