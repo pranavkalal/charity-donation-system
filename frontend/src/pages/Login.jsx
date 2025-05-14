@@ -24,7 +24,7 @@ const Login = () => {
       if (isAdmin) {
         navigate('/admin');
       } else {
-        navigate('/users');
+        navigate('/'); // Redirect to home page
       }
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed. Please try again.';
