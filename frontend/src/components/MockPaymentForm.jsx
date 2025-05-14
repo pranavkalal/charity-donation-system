@@ -1,7 +1,36 @@
+// MockPaymentForm.jsx
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+//
+// Factory Pattern – Payment Button Factory
+//
+const StripeButton = ({ onClick, amount }) => (
+  <button onClick={onClick} className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
+    Pay ${amount} with Stripe
+  </button>
+);
+
+const PayPalButton = ({ onClick, amount }) => (
+  <button onClick={onClick} className="bg-yellow-500 text-white px-6 py-2 rounded-md hover:bg-yellow-600">
+    Pay ${amount} with PayPal
+  </button>
+);
+
+const PaymentButtonFactory = {
+  create(method, amount, onClick) {
+    switch (method) {
+      case 'Stripe': return <StripeButton onClick={onClick} amount={amount} />;
+      case 'PayPal': return <PayPalButton onClick={onClick} amount={amount} />;
+      default: throw new Error("Unsupported payment method");
+    }
+  }
+};
+
+//
+// Main Component
+//
 const MockPaymentForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -9,7 +38,6 @@ const MockPaymentForm = () => {
   const [amount, setAmount] = useState("20");
   const [customAmount, setCustomAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Stripe");
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAmountChange = (value) => {
     setAmount(value);
@@ -23,8 +51,6 @@ const MockPaymentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsProcessing(true);
-
     const finalAmount = parseFloat(amount || customAmount);
 
     if (isNaN(finalAmount) || finalAmount <= 0) {
@@ -33,51 +59,38 @@ const MockPaymentForm = () => {
     }
 
     try {
-      // Get auth token from localStorage
-      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = localStorage.getItem('token');
 
-      if (!userData || !userData.token) {
-        alert("You need to be logged in to make a donation.");
-        navigate('/login', { state: { from: `/campaigns/${id}` } });
-        return;
-      }
-
-      // Include auth token in request
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userData.token}`
+      await axios.post(
+        `/api/campaigns/${id}/donate`,
+        { amount: finalAmount },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      };
+      );
 
-      const response = await axios.post(`/api/campaigns/${id}/donate`, {
-        amount: finalAmount,
-      },config);
-
-      console.log('Donation response:', response.data);
-
-      alert(`✅ Thank you! You donated $${finalAmount} to campaign ID: ${id} via ${paymentMethod}`);
-      
-      // Navigate back to campaign page
+      alert(` Donated $${finalAmount} via ${paymentMethod}`);
       navigate(`/campaigns/${id}`);
     } catch (error) {
       console.error("Donation failed:", error);
-      alert("❌ Donation failed. Please try again later.");
-    } finally {
-      setIsProcessing(false);
+      if (error.response?.status === 401) {
+        alert(" You must be logged in to donate.");
+        navigate('/login');
+      } else {
+        alert(" Donation failed. Please try again later.");
+      }
     }
   };
 
+  const paymentButton = PaymentButtonFactory.create(paymentMethod, amount || customAmount, handleSubmit);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-start py-8 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white w-full max-w-xl rounded-xl shadow-md p-6 space-y-6"
-      >
+      <form className="bg-white w-full max-w-xl rounded-xl shadow-md p-6 space-y-6">
         <div>
-          <label className="block text-gray-800 font-medium mb-2">
-            How much would you like to donate?
-          </label>
+          <label className="block text-gray-800 font-medium mb-2">How much would you like to donate?</label>
           <div className="space-y-2">
             {["20", "30", "60"].map((val) => (
               <label key={val} className="flex items-center space-x-2">
@@ -102,9 +115,7 @@ const MockPaymentForm = () => {
         </div>
 
         <div>
-          <label className="block text-gray-800 font-medium mb-2">
-            How would you like to pay?
-          </label>
+          <label className="block text-gray-800 font-medium mb-2">Select Payment Method</label>
           <div className="space-y-2">
             {["Stripe", "PayPal"].map((method) => (
               <label key={method} className="flex items-center space-x-2">
@@ -129,14 +140,7 @@ const MockPaymentForm = () => {
           >
             Back
           </button>
-          <button
-            type="submit"
-            disabled={isProcessing}
-            className={`${isProcessing ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-              } text-white px-6 py-2 rounded-md`}
-          >
-            {isProcessing ? 'Processing...' : `Pay with ${paymentMethod}`}
-          </button>
+          {paymentButton}
         </div>
       </form>
     </div>
