@@ -1,27 +1,48 @@
-import React, { useEffect, useState, useCallback, memo } from 'react';
-import { getCampaigns } from '../api/campaignAPI';
+// CampaignList.jsx
+import React, { useEffect, useState, useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Memoized campaign card component to prevent unnecessary re-renders
+// Singleton Pattern – App Config
+class ConfigSingleton {
+  constructor() {
+    if (!ConfigSingleton.instance) {
+      this.config = {
+        defaultImageUrl: 'https://via.placeholder.com/150?text=No+Image',
+        errorImageUrl: 'https://via.placeholder.com/150?text=Image+Error',
+      };
+      ConfigSingleton.instance = this;
+    }
+    return ConfigSingleton.instance;
+  }
+
+  get(key) {
+    return this.config[key];
+  }
+}
+const config = new ConfigSingleton();
+
+// Memoized Card Component
 const CampaignCard = memo(({ item, onNavigate }) => {
   const handleImageError = (e) => {
-    e.target.src = "https://via.placeholder.com/150?text=Image+Error";
+    e.target.src = config.get('errorImageUrl');
   };
 
   return (
-    <div 
-      className="flex bg-white p-6 rounded-xl shadow-md items-center border border-transparent hover:border-blue-400 transition"
-    >
+    <div className="flex bg-white p-6 rounded-xl shadow-md items-center border border-transparent hover:border-blue-400 transition">
       <img
-        src={item?.mediaUrl || "https://via.placeholder.com/150?text=No+Image"}
+        src={item?.mediaUrl || config.get('defaultImageUrl')}
         alt={item?.title || "Campaign Image"}
         className="w-40 h-40 object-cover rounded-md mr-6"
         onError={handleImageError}
-        loading="lazy" // Add lazy loading for images
+        loading="lazy"
       />
       <div className="flex-1">
-        <h2 className="text-xl font-semibold text-blue-900">{item?.title || "Untitled Campaign"}</h2>
-        <p className="text-sm text-gray-600">{item?.description || 'No description available'}</p>
+        <h2 className="text-xl font-semibold text-blue-900">
+          {item?.title || "Untitled Campaign"}
+        </h2>
+        <p className="text-sm text-gray-600">
+          {item?.description || 'No description available'}
+        </p>
         <div className="flex justify-between items-center mt-4">
           <span className="text-sm text-gray-700">
             Raised: ${item?.raisedAmount ?? 0} / Goal: ${item?.goalAmount ?? 0}
@@ -38,86 +59,74 @@ const CampaignCard = memo(({ item, onNavigate }) => {
   );
 });
 
-// Main component with optimizations
+// Skeleton Placeholder Component
+const SkeletonCard = () => (
+  <div className="animate-pulse bg-white p-6 rounded-xl shadow-md border border-gray-200">
+    <div className="w-40 h-40 bg-gray-200 rounded-md mb-4"></div>
+    <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+    <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
+    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+  </div>
+);
+
+// Main Component
 const CampaignList = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Memoize the navigation handler
   const handleNavigate = useCallback((id) => {
     navigate(`/campaigns/${id}`);
   }, [navigate]);
 
-  // Optimized fetch function with better error handling
   useEffect(() => {
     let isMounted = true;
-    
-    const fetchCampaigns = async () => {
-      try {
-        const response = await getCampaigns();
-        
+
+    fetch('/api/campaigns')
+      .then(res => res.json())
+      .then(data => {
         if (!isMounted) return;
-        
-        if (Array.isArray(response)) {
-          setCampaigns(response);
-        } else if (Array.isArray(response?.campaigns)) {
-          setCampaigns(response.campaigns);
-        } else {
-          setCampaigns([]);
-          console.warn('Unexpected response format:', response);
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        console.error('Error fetching campaigns:', error);
-        setError('Failed to load campaigns. Please try again later.');
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-    
-    fetchCampaigns();
-    
-    // Cleanup function to prevent state updates if component unmounts
+        const list = Array.isArray(data) ? data : data.campaigns || [];
+        const activeCampaigns = list.filter(c => c.status !== 'Inactive');
+        setCampaigns(activeCampaigns);
+      })
+      .catch((err) => {
+        if (isMounted) setError('Failed to load campaigns.');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
     return () => {
       isMounted = false;
     };
   }, []);
 
+  const renderedCards = useMemo(() => {
+    return campaigns.map((item) => (
+      <CampaignCard key={item._id} item={item} onNavigate={handleNavigate} />
+    ));
+  }, [campaigns, handleNavigate]);
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-10 h-64">
-        <div className="text-gray-600 text-lg">Loading campaigns...</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-8">
+        {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center p-10 h-64">
-        <div className="text-red-500 text-lg">{error}</div>
-      </div>
-    );
-  }
+  if (error) return <div className="text-center text-red-500 py-8">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 md:px-12 py-4">
-      <h1 className="text-4xl font-bold text-blue-900 mb-8 mt-2">Campaigns</h1>
-
+    <div className="min-h-screen px-6 py-4 bg-gray-50">
+      <h1 className="text-4xl font-bold text-blue-900 mb-8">Campaigns</h1>
       {campaigns.length === 0 ? (
-        <p className="text-gray-500 text-center p-10">No campaigns available.</p>
+        <p className="text-gray-500 text-center">No campaigns available.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-          {campaigns.map((item) => (
-            <CampaignCard 
-              key={item._id} 
-              item={item} 
-              onNavigate={handleNavigate}
-            />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {renderedCards}
         </div>
       )}
     </div>
