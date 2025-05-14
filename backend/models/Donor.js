@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+/*const mongoose = require("mongoose");
 
 const donorSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -9,3 +9,4 @@ const donorSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Donor", donorSchema);
+*/

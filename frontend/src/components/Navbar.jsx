@@ -34,7 +34,6 @@ const Navbar = () => {
               )}
 
               <Link to="/campaigns" className="text-gray-800 hover:text-indigo-600 text-base">Campaigns</Link>
-              <Link to="/beneficiaries" className="text-gray-800 hover:text-indigo-600 text-base">Beneficiary</Link>
               <Link to="/leaderboard" className="text-gray-800 hover:text-indigo-600 text-base">Donor Leaderboard</Link>
             </>
           )}

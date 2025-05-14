@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
+// Icons imports
 import editIcon from '../icons/edit_icon.png';
 import userIcon from '../icons/user_icon.png';
 import emailIcon from '../icons/email_icon.png';
@@ -9,35 +12,197 @@ import calendarIcon from '../icons/calendar_icon.png';
 import donationsIcon from '../icons/donations_icon.png';
 import clockIcon from '../icons/clock_icon.png';
 
-// Main Profile component
+/**
+ * ProfileServiceFacade - Implements the Facade Design Pattern
+ * 
+ * This facade provides a simplified interface to interact with various subsystems:
+ * - Authentication subsystem
+ * - User profile management subsystem  
+ * - Donation tracking subsystem
+ * 
+ * The facade hides the complexity of interacting with these different subsystems
+ * and provides a unified, easy-to-use interface for the UI components.
+ */
+class ProfileServiceFacade {
+  constructor() {
+    this.token = null;
+    this.initializeToken();
+  }
+
+  // Initialize authentication token from local storage
+  initializeToken() {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      this.token = userData?.token;
+    } catch (error) {
+      console.error('Failed to initialize token:', error);
+      this.token = null;
+    }
+  }
+
+  // Get authentication headers for API requests
+  getAuthConfig() {
+    return {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.token}`
+      }
+    };
+  }
+
+  // Check if user is authenticated
+  isAuthenticated() {
+    return !!this.token;
+  }
+
+  // Fetch user profile from the auth subsystem
+  async getUserProfile() {
+    if (!this.isAuthenticated()) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      const { data } = await axios.get('/api/auth/profile', this.getAuthConfig());
+      return data;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
+  }
+
+  // Fetch donation summary from the donation subsystem
+  async getDonationSummary() {
+    if (!this.isAuthenticated()) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      const { data } = await axios.get('/api/donations/summary', this.getAuthConfig());
+      return data;
+    } catch (error) {
+      console.error('Error fetching donation summary:', error);
+      // Return default donation data if fetch fails
+      return {
+        totalDonated: "$0.00",
+        donationsCount: 0,
+        lastDonationDate: "N/A"
+      };
+    }
+  }
+
+  // Update user profile in the auth subsystem
+  async updateUserProfile(profileData) {
+    if (!this.isAuthenticated()) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      const { data } = await axios.put(
+        '/api/auth/profile',
+        profileData,
+        this.getAuthConfig()
+      );
+      return data;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }
+}
+
+/**
+ * Main Profile component
+ * 
+ * Uses the ProfileServiceFacade to interact with backend services
+ * without needing to know the implementation details
+ */
 const Profile = () => {
-  // User state (currently mocked for demo purposes)
-  const [user, setUser] = useState({ token: 'demo-token' });
+  const [user, setUser] = useState(null);
+  const [donations, setDonations] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);  
+  const navigate = useNavigate();
+  
+  // Create an instance of the facade to use throughout the component
+  const profileService = new ProfileServiceFacade();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Check if user is authenticated
+        if (!profileService.isAuthenticated()) {
+          throw new Error('User not authenticated');
+        }
+
+        // Use the facade to fetch user profile
+        const userProfile = await profileService.getUserProfile();
+        setUser(userProfile);
+
+        // Use the facade to fetch donation summary
+        const donationData = await profileService.getDonationSummary();
+        setDonations(donationData);
+      } catch (err) {
+        setError(err.message || 'Failed to load profile');
+        console.error('Error loading profile data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <div className="text-center p-6">Loading profile...</div>;
+  if (error) return <div className="text-center p-6 text-red-600">Error: {error}</div>;
+  if (!user) return <div className="text-center p-6">Please log in to view your profile</div>;
 
   return (
     <div>
-      <PersonalInformation />
-      <DonationSummary />
+      <PersonalInformation 
+        user={user} 
+        setUser={setUser} 
+        profileService={profileService} 
+      />
+      <DonationSummary donationData={donations} />
     </div>
   );
 };
 
-// Component to show and edit personal information
-const PersonalInformation = () => {
+/**
+ * PersonalInformation component
+ * 
+ * Handles the display and editing of user personal information
+ * Uses the facade to update profile data without worrying about authentication details
+ */
+const PersonalInformation = ({ user, setUser, profileService }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: 'Alice Johnson',
-    email: 'alice@gmail.com',
-    phone: '(555) 123-4567',
-    address: '123,Fake Street, Brisbane, QLD 4000',
-    memberSince: '6/15/2023'
+    name: user.name,
+    email: user.email,
+    phone: user.phone || '',
+    address: user.address || '',
+    memberSince: new Date(user.memberSince).toLocaleDateString()
   });
 
-  // Handles form submission (e.g., save changes)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsEditing(false);
-    // This would normally call an API
+
+    try {
+      // Extract only the data that needs to be updated
+      const dataToUpdate = {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address
+      };
+
+      // Use the facade to update the profile
+      const updatedUser = await profileService.updateUserProfile(dataToUpdate);
+      setUser(updatedUser);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile' + (error.response?.data?.message || error.message));
+    }
   };
 
   // Edit mode UI
@@ -45,7 +210,7 @@ const PersonalInformation = () => {
     return (
       <section className="bg-white rounded-lg shadow-md p-6 mb-6">
         <header className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-indigo-900">
+          <h2 className="text-xl font-bold text-blue-900">
             Edit Personal Information
           </h2>
         </header>
@@ -96,7 +261,7 @@ const PersonalInformation = () => {
             <div className="flex gap-3 mt-4">
               <button 
                 type="submit" 
-                className="px-4 py-2 bg-indigo-700 text-white rounded-md text-sm font-medium"
+                className="px-4 py-2 bg-blue-700 text-white rounded-md text-sm font-medium"
               >
                 Save Changes
               </button>
@@ -118,11 +283,11 @@ const PersonalInformation = () => {
   return (
     <section className="bg-white rounded-lg shadow-md p-6 mb-6">
       <header className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-indigo-900">
+        <h2 className="text-xl font-bold text-blue-900">
           Personal Information
         </h2>
         <button 
-          className="flex items-center gap-1 text-md text-indigo-800 font-medium"
+          className="flex items-center gap-1 text-md text-blue-900 font-medium"
           onClick={() => setIsEditing(true)}
         >
           <img
@@ -135,60 +300,60 @@ const PersonalInformation = () => {
       </header>
       <div className="border-t border-gray-200 mt-6"></div>
       <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-3 mt-4">
-        <div className="flex items-center text-indigo-700">
-        <img 
+        <div className="flex items-center text-blue-900">
+          <img 
             src={userIcon} 
             alt="User" 
             className="w-6 h-6" 
-        />
+          />
         </div>
         <div>
           <div className="text-base font-medium">{formData.name}</div>
           <div className="text-sm text-gray-600">Full Name</div>
         </div>
 
-        <div className="flex items-center text-indigo-700">
-        <img 
+        <div className="flex items-center text-blue-900">
+          <img 
             src={emailIcon} 
             alt="Email" 
             className="w-6 h-6" 
-        />
+          />
         </div>
         <div>
           <div className="text-base font-medium">{formData.email}</div>
           <div className="text-sm text-gray-600">Email Address</div>
         </div>
 
-        <div className="flex items-center text-indigo-700">
-        <img 
+        <div className="flex items-center text-blue-900">
+          <img 
             src={phoneIcon} 
             alt="Phone" 
             className="w-6 h-6" 
-        />
+          />
         </div>
         <div>
           <div className="text-base font-medium">{formData.phone}</div>
           <div className="text-sm text-gray-600">Phone Number</div>
         </div>
 
-        <div className="flex items-center text-indigo-700">
-        <img 
+        <div className="flex items-center text-blue-900">
+          <img 
             src={locationIcon} 
             alt="Location" 
             className="w-6 h-6" 
-        />
+          />
         </div>
         <div>
           <div className="text-base font-medium">{formData.address}</div>
           <div className="text-sm text-gray-600">Address</div>
         </div>
 
-        <div className="flex items-center text-indigo-700">
-        <img 
+        <div className="flex items-center text-blue-900">
+          <img 
             src={calendarIcon} 
             alt="Calendar" 
             className="w-6 h-6" 
-        />
+          />
         </div>
         <div>
           <div className="text-base font-medium">{formData.memberSince}</div>
@@ -199,35 +364,40 @@ const PersonalInformation = () => {
   );
 };
 
-// Component to display donation-related information
-const DonationSummary = () => {
-  const [donationData, setDonationData] = useState({
-    totalDonated: "$1000.00",
-    donationsCount: 1,
-    lastDonationDate: "4/15/2025"
-  });
+/**
+ * DonationSummary component
+ * 
+ * Displays donation-related information
+ * Could be expanded to use the facade for additional donation-related operations
+ */
+const DonationSummary = ({ donationData }) => {
+  // Provide default data if no donation data is available
+  const displayData = donationData || {
+    totalDonated: "$0.00",
+    donationsCount: 0,
+    lastDonationDate: "N/A"
+  };
 
   return (
     <section className="bg-white rounded-lg shadow-md p-6 mb-6">
-    {/* Flex container for heading + button */}
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-bold text-indigo-900">
-        Donation Summary
-      </h2>
-      <button
-        className="px-4 py-1 bg-indigo-700 text-white rounded-md text-md font-medium"
-        onClick={() => alert('View donation history')}
-      >
-        History
-      </button>
-    </div>
+      {/* Flex container for heading + button */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-blue-900">
+          Donation Summary
+        </h2>
+        <button
+          className="px-4 py-1 bg-blue-900 text-white rounded-md text-md font-medium"
+          onClick={() => alert('View donation history')}
+        >
+          History
+        </button>
+      </div>
 
-    <div className="border-t border-gray-200 mb-4"></div>
-
+      <div className="border-t border-gray-200 mb-4"></div>
       
       <div className="text-center mb-6">
-        <div className="text-2xl font-bold text-indigo-900 mt-6">
-          {donationData.totalDonated}
+        <div className="text-2xl font-bold text-blue-900 mt-6">
+          {displayData.totalDonated}
         </div>
         <div className="text-sm text-gray-600">
           Total Donated
@@ -237,7 +407,7 @@ const DonationSummary = () => {
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-          <img 
+            <img 
               src={donationsIcon} 
               alt="Donations" 
               className="w-6 h-6" 
@@ -245,7 +415,7 @@ const DonationSummary = () => {
             <span className="text-sm text-gray-600">Donations</span>
           </div>
           <div className="flex items-center gap-2">
-          <img 
+            <img 
               src={clockIcon} 
               alt="Clock" 
               className="w-6 h-6" 
@@ -254,8 +424,8 @@ const DonationSummary = () => {
           </div>
         </div>
         <div className="flex flex-col gap-3 text-right">
-          <div className="text-base font-medium">{donationData.donationsCount}</div>
-          <div className="text-base font-medium">{donationData.lastDonationDate}</div>
+          <div className="text-base font-medium">{displayData.donationsCount}</div>
+          <div className="text-base font-medium">{displayData.lastDonationDate}</div>
         </div>
       </div>
     </section>

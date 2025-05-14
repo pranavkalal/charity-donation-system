@@ -43,7 +43,9 @@ const createDonation = async (req, res) => {
     const donation = await Donation.create({
       amount,
       campaign,
-      donor: req.user.id  // Automatically set from logged-in user
+      donor: req.user.id,  // Automatically set from logged-in user
+      status: 'completed',
+      date: new Date()
     });
 
     res.status(201).json(donation);
@@ -87,11 +89,122 @@ const getUserDonations = async (req, res) => {
   }
 };
 
+// Get donation summary for current user
+const getDonationSummary = async (req, res) => {
+  try {
+    // Get all donations for the current user
+    const donations = await Donation.find({ donor: req.user.id })
+      .sort({ date: -1 });
+    
+    if (!donations || donations.length === 0) {
+      return res.status(200).json({
+        totalDonated: "$0.00",
+        donationsCount: 0,
+        lastDonationDate: "N/A"
+      });
+    }
+    
+    // Calculate total amount donated
+    const totalAmount = donations.reduce((sum, donation) => sum + donation.amount, 0);
+    
+    // Format as currency
+    const totalDonated = "$" + totalAmount.toFixed(2);
+    
+    // Count of donations
+    const donationsCount = donations.length;
+    
+    // Most recent donation date
+    const lastDonationDate = donations[0].date 
+      ? new Date(donations[0].date).toLocaleDateString() 
+      : "N/A";
+    
+    res.status(200).json({
+      totalDonated,
+      donationsCount,
+      lastDonationDate
+    });
+    
+  } catch (error) {
+    res.status(500).json({ 
+      message: 'Failed to retrieve donation summary', 
+      error: error.message 
+    });
+  }
+};
+
+// Get donor leaderboard
+const getDonorLeaderboard = async (req, res) => {
+  try {
+    const leaderboard = await Donation.aggregate([
+      {
+        $match: { status: 'completed' } // Only include completed donations
+      },
+      {
+        $lookup: {
+          from: 'campaigns',
+          localField: 'campaign',
+          foreignField: '_id',
+          as: 'campaignInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$campaignInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: '$donor',
+          totalDonated: { $sum: '$amount' },
+          donationCount: { $sum: 1 },
+          // Store campaign info from the last donation
+          lastCampaign: { $last: '$campaignInfo' },
+          // Store the date of the last donation
+          lastDonation: { $last: '$date' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'donor'
+        }
+      },
+      {
+        $unwind: '$donor'
+      },
+      {
+        $project: {
+          _id: 0,
+          name: '$donor.name',
+          email: '$donor.email',
+          totalDonated: 1,
+          donationCount: 1,
+          campaign: { $ifNull: ['$lastCampaign.title', 'Unknown Campaign'] },
+          lastDonation: 1
+        }
+      },
+      {
+        $sort: { totalDonated: -1 }
+      }
+    ]);
+
+    res.status(200).json(leaderboard);
+  } catch (error) {
+    console.error('Leaderboard error:', error);
+    res.status(500).json({ message: 'Failed to get donor leaderboard', error: error.message });
+  }
+};
+
 module.exports = {
   getDonations,
   getDonationById,
   createDonation,
   updateDonation,
   deleteDonation,
-  getUserDonations
+  getUserDonations,
+  getDonationSummary,
+  getDonorLeaderboard
 };
