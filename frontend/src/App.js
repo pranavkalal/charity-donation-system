@@ -4,12 +4,13 @@ import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Donors from './pages/users';
 import Campaigns from './pages/Campaigns';
 import Donations from './pages/Donations';
 import CreateCampaign from './pages/CreateCampaign';
-import CampaignDesc from "./components/CampaignDesc"; 
+import CampaignDesc from "./components/CampaignDesc";
 import MockPaymentForm from "./components/MockPaymentForm"
 import Footer from './components/Footer';
 import DonorLeaderboard from "./pages/DonorLeaderboard";
@@ -31,7 +32,8 @@ const App = () => {
       <div className="w-screen px-8 pt-0 pb-6">
         <Routes>
           {/* Redirect based on login status */}
-          <Route path="/" element={<Navigate to={user ? '/users' : '/login'} />} />
+          <Route path="/" element={<Home />} />
+          {/* <Route path="/" element={<Navigate to={user ? '/users' : '/login'} />} /> */}
 
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
@@ -47,13 +49,13 @@ const App = () => {
             }
           />
           <Route
-  path="/admin"
-  element={
-    <PrivateRoute>
-      {user?.isAdmin ? <AdminDashboard /> : <Navigate to="/" />}
-    </PrivateRoute>
-  }
-/>
+            path="/admin"
+            element={
+              <PrivateRoute>
+                {user?.isAdmin ? <AdminDashboard /> : <Navigate to="/" />}
+              </PrivateRoute>
+            }
+          />
 
           <Route
             path="/users"
@@ -94,16 +96,16 @@ const App = () => {
                 {user?.isAdmin ? <CreateCampaign /> : <Navigate to="/" />}
               </PrivateRoute>
             }
-/>
+          />
 
-          <Route path="/campaigns/:id" element={<CampaignDesc />} />
-          <Route path="/campaigns/:id/payment" element={<MockPaymentForm />} />
+          <Route path="/campaigns/:id" element={<CampaignDesc />} />
+          <Route path="/campaigns/:id/payment" element={<MockPaymentForm />} />
 
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
-      <Footer /> 
+      <Footer />
     </Router>
   );
 };
