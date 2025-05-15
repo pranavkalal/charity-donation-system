@@ -6,34 +6,42 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
+// Strategy Design Pattern
 import FilterByStatus from '../strategies/campaignFilters/FilterByStatus';
 import FilterByGoalAmount from '../strategies/campaignFilters/FilterByGoalAmount';
+
+// 📦 Donor API (assumes you have this file/method)
+import { getDonorLeaderboard } from '../api/donationAPI';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [campaigns, setCampaigns] = useState([]);
+  const [donors, setDonors] = useState([]);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
   const [minGoal, setMinGoal] = useState('');
 
   useEffect(() => {
-    const fetchCampaigns = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axiosInstance.get('/api/campaigns', {
-          headers: {
-            Authorization: `Bearer ${user.token}`
-          }
-        });
-        setCampaigns(res.data);
+        const [campaignRes, donorRes] = await Promise.all([
+          axiosInstance.get('/api/campaigns', {
+            headers: { Authorization: `Bearer ${user.token}` },
+          }),
+          getDonorLeaderboard(), // assumed to work without token
+        ]);
+
+        setCampaigns(campaignRes.data);
+        setDonors(donorRes.data || donorRes); // fallback in case `.data` not used
       } catch (err) {
-        console.error('Failed to fetch campaigns:', err);
-        setError('Could not load campaigns.');
+        console.error('Failed to fetch dashboard data:', err);
+        setError('Could not load dashboard data.');
       }
     };
 
-    fetchCampaigns();
+    fetchData();
   }, [user.token]);
 
   const handleDelete = async (id) => {
@@ -42,9 +50,9 @@ const AdminDashboard = () => {
 
     try {
       await axiosInstance.delete(`/api/campaigns/${id}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers: { Authorization: `Bearer ${user.token}` },
       });
-      setCampaigns(prev => prev.filter(c => c._id !== id));
+      setCampaigns((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
       console.error('Failed to delete campaign:', err);
     }
@@ -54,7 +62,7 @@ const AdminDashboard = () => {
     navigate('/admin/create-campaign', { state: { campaign } });
   };
 
-  // 🎯 Apply Filters
+  // 🧠 Apply Filters
   let filtered = campaigns;
 
   if (filter) {
@@ -66,6 +74,8 @@ const AdminDashboard = () => {
     const goalStrategy = new FilterByGoalAmount(parseFloat(minGoal));
     filtered = goalStrategy.apply(filtered);
   }
+
+  const totalRaised = campaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0);
 
   return (
     <div className="flex min-h-screen bg-[#f1f2f9] font-['Plus Jakarta Sans','Noto Sans',sans-serif]">
@@ -83,8 +93,8 @@ const AdminDashboard = () => {
 
         <div className="flex gap-4 mb-6">
           <AdminSummaryCard label="Total Campaigns" value={campaigns.length} />
-          <AdminSummaryCard label="Total Donations" value={`$${campaigns.reduce((sum, c) => sum + (c.raisedAmount || 0), 0)}`} />
-          <AdminSummaryCard label="Total Donors" value="2" />
+          <AdminSummaryCard label="Total Donations" value={`$${totalRaised}`} />
+          <AdminSummaryCard label="Total Donors" value={donors.length} />
         </div>
 
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
