@@ -1,5 +1,10 @@
 import React from 'react';
 
+// ✅ Decorator function for row background based on status
+const decorateRow = (status) => {
+  return `border-t border-[#cacde7] ${status === 'Inactive' ? 'bg-red-100' : 'bg-white'}`;
+};
+
 const AdminCampaignTable = ({ campaigns, onDelete, onEdit }) => {
   return (
     <div className="overflow-hidden rounded-xl border border-[#cacde7] bg-[#f1f2f9]">
@@ -15,7 +20,7 @@ const AdminCampaignTable = ({ campaigns, onDelete, onEdit }) => {
         </thead>
         <tbody>
           {campaigns.map((c) => (
-            <tr key={c._id} className="border-t border-[#cacde7]">
+            <tr key={c._id} className={decorateRow(c.status)}>
               <td className="px-4 py-3 text-sm text-[#0d0e1c]">{c.title}</td>
               <td className="px-4 py-3 text-sm text-[#464d9b]">{c.goalAmount}</td>
               <td className="px-4 py-3 text-sm text-[#464d9b]">{c.raisedAmount}</td>

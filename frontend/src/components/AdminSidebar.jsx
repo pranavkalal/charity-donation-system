@@ -17,14 +17,14 @@ const AdminSidebar = () => {
         </div>
         <nav className="flex flex-col gap-1">
           <button onClick={() => handleNav('/admin')} className="text-left w-full px-4 py-2 rounded-full text-sm font-medium text-[#0d0e1c] hover:bg-[#e2e4f2] transition">Dashboard</button>
-          <button onClick={() => handleNav('/admin/create-campaign')} className="text-left w-full px-4 py-2 rounded-full text-sm font-medium text-[#0d0e1c] hover:bg-[#e2e4f2] transition">Campaigns</button>
+          <button onClick={() => handleNav('/admin/create-campaign')} className="text-left w-full px-4 py-2 rounded-full text-sm font-medium text-[#0d0e1c] hover:bg-[#e2e4f2] transition"> Create Campaigns</button>
           <button className="text-left w-full px-4 py-2 rounded-full text-sm font-medium text-[#0d0e1c] hover:bg-[#e2e4f2] transition">Beneficiary</button>
-          <button className="text-left w-full px-4 py-2 rounded-full text-sm font-medium text-[#0d0e1c] hover:bg-[#e2e4f2] transition">Reports</button>
+
           <button className="text-left w-full px-4 py-2 rounded-full text-sm font-medium text-[#0d0e1c] hover:bg-[#e2e4f2] transition">Settings</button>
-          <button className="text-left w-full px-4 py-2 rounded-full text-sm font-medium text-[#0d0e1c] hover:bg-[#e2e4f2] transition">Leaderboard</button>
+
         </nav>
       </div>
-      <button className="text-sm text-red-600 ml-4 mb-4 hover:underline">Logout</button>
+  
     </aside>
   );
 };
