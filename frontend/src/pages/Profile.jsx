@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getDonationSummary } from '../api/donationAPI';
 
 // Icons imports
 import editIcon from '../icons/edit_icon.png';
@@ -71,24 +72,24 @@ class ProfileServiceFacade {
   }
 
   // Fetch donation summary from the donation subsystem
-  async getDonationSummary() {
-    if (!this.isAuthenticated()) {
-      throw new Error('User not authenticated');
-    }
+  // async getDonationSummary() {
+  //   if (!this.isAuthenticated()) {
+  //     throw new Error('User not authenticated');
+  //   }
 
-    try {
-      const { data } = await axios.get('/api/donations/summary', this.getAuthConfig());
-      return data;
-    } catch (error) {
-      console.error('Error fetching donation summary:', error);
-      // Return default donation data if fetch fails
-      return {
-        totalDonated: "$0.00",
-        donationsCount: 0,
-        lastDonationDate: "N/A"
-      };
-    }
-  }
+  //   try {
+  //     const { data } = await axios.get('/api/donations/summary', this.getAuthConfig());
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Error fetching donation summary:', error);
+  //     // Return default donation data if fetch fails
+  //     return {
+  //       totalDonated: "$0.00",
+  //       donationsCount: 0,
+  //       lastDonationDate: "N/A"
+  //     };
+  //   }
+  // }
 
   // Update user profile in the auth subsystem
   async updateUserProfile(profileData) {
@@ -121,6 +122,8 @@ const Profile = () => {
   const [donations, setDonations] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);  
+  const [donationHistory, setDonationHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
   const navigate = useNavigate();
   
   // Create an instance of the facade to use throughout the component
@@ -139,7 +142,7 @@ const Profile = () => {
         setUser(userProfile);
 
         // Use the facade to fetch donation summary
-        const donationData = await profileService.getDonationSummary();
+        const donationData = await getDonationSummary();
         setDonations(donationData);
       } catch (err) {
         setError(err.message || 'Failed to load profile');
@@ -151,6 +154,21 @@ const Profile = () => {
 
     fetchData();
   }, []);
+
+  const fetchDonationHistory = async () => {
+    try {
+      const { data } = await axios.get('/api/donations/user-donations', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      setDonationHistory(data);
+      setShowHistory(true); // 显示历史记录
+    } catch (err) {
+      console.error('Error fetching donation history:', err);
+      alert('Failed to fetch donation history');
+    }
+  };
 
   if (loading) return <div className="text-center p-6">Loading profile...</div>;
   if (error) return <div className="text-center p-6 text-red-600">Error: {error}</div>;
