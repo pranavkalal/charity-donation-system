@@ -6,12 +6,17 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
+import FilterByStatus from '../strategies/campaignFilters/FilterByStatus';
+import FilterByGoalAmount from '../strategies/campaignFilters/FilterByGoalAmount';
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [campaigns, setCampaigns] = useState([]);
   const [error, setError] = useState('');
+  const [filter, setFilter] = useState('');
+  const [minGoal, setMinGoal] = useState('');
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -49,6 +54,19 @@ const AdminDashboard = () => {
     navigate('/admin/create-campaign', { state: { campaign } });
   };
 
+  // 🎯 Apply Filters
+  let filtered = campaigns;
+
+  if (filter) {
+    const statusStrategy = new FilterByStatus(filter);
+    filtered = statusStrategy.apply(filtered);
+  }
+
+  if (minGoal) {
+    const goalStrategy = new FilterByGoalAmount(parseFloat(minGoal));
+    filtered = goalStrategy.apply(filtered);
+  }
+
   return (
     <div className="flex min-h-screen bg-[#f1f2f9] font-['Plus Jakarta Sans','Noto Sans',sans-serif]">
       <AdminSidebar />
@@ -69,19 +87,36 @@ const AdminDashboard = () => {
           <AdminSummaryCard label="Total Donors" value="2" />
         </div>
 
-        <div className="mb-6">
-          <label className="block text-[#0d0e1c] font-medium mb-2">Filter Campaigns</label>
-          <select className="w-full max-w-xs p-3 border border-[#cacde7] rounded-xl bg-white">
-            <option value="">Select filter</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[#0d0e1c] font-medium mb-2">Filter by Status</label>
+            <select
+              className="w-full max-w-xs p-3 border border-[#cacde7] rounded-xl bg-white"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[#0d0e1c] font-medium mb-2">Min Goal Amount</label>
+            <input
+              type="number"
+              className="w-full max-w-xs p-3 border border-[#cacde7] rounded-xl bg-white"
+              placeholder="e.g. 1000"
+              value={minGoal}
+              onChange={(e) => setMinGoal(e.target.value)}
+            />
+          </div>
         </div>
 
         {error && <p className="text-red-600">{error}</p>}
 
         <AdminCampaignTable
-          campaigns={campaigns}
+          campaigns={filtered}
           onDelete={handleDelete}
           onEdit={handleEdit}
         />
