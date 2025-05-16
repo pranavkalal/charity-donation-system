@@ -3,7 +3,7 @@ const donationService = new DonationService();
 
 const getDonations = async (req, res) => {
   try {
-    const donations = await donationService.getAllDonations();
+    const donations = await donationService.getDonations();
     res.status(200).json(donations);
   } catch (error) {
     res.status(500).json({ message: 'Failed to retrieve donations', error: error.message });

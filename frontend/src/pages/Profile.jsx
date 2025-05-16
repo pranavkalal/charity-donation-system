@@ -437,10 +437,9 @@ const DonationSummary = ({ donationData, onHistoryClick }) => {
 };
 
 const DonationHistory = ({ donations, onBack }) => {
-  const [currentPage, setCurrentPage] = useState(1); // 当前页码
-  const itemsPerPage = 5; // 每页显示的记录数
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-  // 计算分页数据
   const totalPages = Math.ceil(donations.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentDonations = donations.slice(startIndex, startIndex + itemsPerPage);
