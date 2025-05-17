@@ -1,4 +1,3 @@
-// CampaignList.jsx
 import React, { useEffect, useState, useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
