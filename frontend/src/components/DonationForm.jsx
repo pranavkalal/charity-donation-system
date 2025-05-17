@@ -44,11 +44,11 @@ const DonationForm = ({ onDonationCreated }) => {
       await axiosInstance.post('/api/donations', formData, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      setMessage('✅ Donation added successfully!');
+      setMessage(' Donation added successfully!');
       setFormData({ amount: '', campaign: '' });
       if (onDonationCreated) onDonationCreated();
     } catch (err) {
-      setMessage('❌ Failed to make donation.');
+      setMessage('Failed to make donation.');
       console.error(err);
     }
   };
