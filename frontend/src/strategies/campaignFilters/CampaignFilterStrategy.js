@@ -1,4 +1,4 @@
-// src/strategies/campaignFilters/CampaignFilterStrategy.js
+
 
 export default class CampaignFilterStrategy {
     apply(campaigns) {
