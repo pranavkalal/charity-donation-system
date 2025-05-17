@@ -42,7 +42,7 @@ const CampaignDesc = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10">
-      
+      {/* Banner Image with Title */}
       <div className="w-full max-w-4xl px-4">
         <div className="relative w-full h-72 rounded-xl overflow-hidden shadow">
           <img
@@ -56,6 +56,7 @@ const CampaignDesc = () => {
         </div>
       </div>
 
+      {/* Donate Button */}
       <div className="mt-6">
         <Link
           to={`/campaigns/${id}/payment`}
@@ -65,12 +66,13 @@ const CampaignDesc = () => {
         </Link>
       </div>
 
-     
+      {/* About Section */}
       <div className="w-full max-w-4xl bg-white px-6 py-4 mt-8 rounded-lg shadow">
         <h2 className="text-2xl font-semibold text-gray-800 mb-2">About This Campaign</h2>
         <p className="text-gray-700">{description}</p>
       </div>
 
+      {/* Progress Section */}
       <div className="w-full max-w-4xl bg-white px-6 py-4 mt-6 rounded-lg shadow">
         <div className="flex justify-between text-sm text-gray-600 mb-2">
           <span>Raised: ${raisedAmount.toLocaleString()}</span>
