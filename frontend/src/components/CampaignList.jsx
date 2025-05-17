@@ -21,7 +21,6 @@ class ConfigSingleton {
 }
 const config = new ConfigSingleton();
 
-// Memoized Card Component
 const CampaignCard = memo(({ item, onNavigate }) => {
   const handleImageError = (e) => {
     e.target.src = config.get('errorImageUrl');
@@ -59,7 +58,6 @@ const CampaignCard = memo(({ item, onNavigate }) => {
   );
 });
 
-// Skeleton Placeholder Component
 const SkeletonCard = () => (
   <div className="animate-pulse bg-white p-6 rounded-xl shadow-md border border-gray-200">
     <div className="w-40 h-40 bg-gray-200 rounded-md mb-4"></div>
@@ -69,7 +67,6 @@ const SkeletonCard = () => (
   </div>
 );
 
-// Main Component
 const CampaignList = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);

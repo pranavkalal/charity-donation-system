@@ -15,7 +15,7 @@ const DonorForm = ({ onDonorAdded }) => {
       const response = await axiosInstance.post('/api/donors', formData);
       setFormData({ name: '', email: '' });
       setError('');
-      if (onDonorAdded) onDonorAdded(response.data); // Optional callback
+      if (onDonorAdded) onDonorAdded(response.data); 
     } catch (err) {
       setError('Failed to add donor.');
     }

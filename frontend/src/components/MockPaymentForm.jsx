@@ -1,4 +1,4 @@
-// MockPaymentForm.jsx
+
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -28,9 +28,6 @@ const PaymentButtonFactory = {
   }
 };
 
-//
-// Main Component
-//
 const MockPaymentForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();

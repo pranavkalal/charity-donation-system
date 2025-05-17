@@ -28,7 +28,6 @@ const Navbar = () => {
 
           {user && (
             <>
-              {/* ✅ Admins only: Dashboard link */}
               {user.isAdmin && (
                 <Link to="/admin" className="text-gray-800 hover:text-indigo-600 text-base">Dashboard</Link>
               )}

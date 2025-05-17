@@ -66,13 +66,13 @@ const CampaignForm = ({ initialData = null, onCampaignCreated }) => {
         await axiosInstance.put(`/api/campaigns/${initialData._id}`, formData, {
           headers: { Authorization: `Bearer ${user.token}` }
         });
-        setSuccess('✅ Campaign updated successfully!');
+        setSuccess('Campaign updated successfully!');
         setTimeout(() => navigate('/admin'), 1000);
       } else {
         await axiosInstance.post('/api/campaigns', formData, {
           headers: { Authorization: `Bearer ${user.token}` }
         });
-        setSuccess('✅ Campaign created successfully!');
+        setSuccess('Campaign created successfully!');
         setFormData({
           title: '',
           description: '',
@@ -87,7 +87,7 @@ const CampaignForm = ({ initialData = null, onCampaignCreated }) => {
         onCampaignCreated?.();
       }
     } catch {
-      setError(`❌ Failed to ${isEdit ? 'update' : 'create'} campaign.`);
+      setError(`Failed to ${isEdit ? 'update' : 'create'} campaign.`);
     }
   };
 
@@ -184,7 +184,6 @@ const CampaignForm = ({ initialData = null, onCampaignCreated }) => {
         </select>
       </div>
 
-      {/* Add media */}
       <div className="mb-6 border-2 border-dashed border-[#cacde7] rounded-xl px-6 py-10 text-center bg-white">
         <p className="text-lg font-bold text-[#0d0e1c] mb-2">Add media</p>
         <p className="text-sm text-[#6b7280] mb-4">Max file size 10MB</p>
