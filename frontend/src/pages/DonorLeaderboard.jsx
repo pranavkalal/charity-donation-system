@@ -15,9 +15,8 @@ export default function DonorLeaderboard() {
         setLoading(true);
         const response = await getDonorLeaderboard();
         
-        // Handle the response data
         const leaderboardData = response.data || response;
-        console.log('API Response:', leaderboardData); // Debug
+        console.log('API Response:', leaderboardData); 
         
         setDonors(leaderboardData);
         setFilteredDonors(leaderboardData);
@@ -45,11 +44,9 @@ export default function DonorLeaderboard() {
     setFilteredDonors(filtered);
   }, [searchQuery, donors]);
 
-  // Calculate stats
   const totalDonations = donors.reduce((sum, d) => sum + d.totalDonated, 0);
   const topDonation = donors.length > 0 ? Math.max(...donors.map(d => d.totalDonated)) : 0;
 
-  // Helper function to format dates safely
   const formatDate = (dateStr) => {
     try {
       if (!dateStr) return 'N/A';
@@ -68,7 +65,6 @@ export default function DonorLeaderboard() {
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold text-blue-900 mb-6">Top Donors</h1>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white p-4 rounded shadow">
             <h2 className="text-gray-500 mb-2">Total Donors</h2>
@@ -86,10 +82,9 @@ export default function DonorLeaderboard() {
           </div>
         </div>
 
-        {/* Filters */}
         <h2 className="text-lg font-semibold text-blue-900 mb-3">Filter Leaderboard</h2>
         <div className="flex flex-wrap items-center gap-4 mb-6">
-          {/* Time Filter */}
+         
           <div className="relative">
             <select
               className="appearance-none bg-white border border-gray-300 rounded py-2 px-4 pr-8 leading-tight focus:outline-none focus:border-blue-500"
@@ -107,7 +102,6 @@ export default function DonorLeaderboard() {
             </div>
           </div>
 
-          {/* Search Input */}
           <div className="relative">
             <input
               type="text"
@@ -124,7 +118,6 @@ export default function DonorLeaderboard() {
           </div>
         </div>
 
-        {/* Leaderboard Table */}
         <h2 className="text-lg font-semibold text-blue-900 mb-3">Donor Leaderboard</h2>
         <div className="bg-white rounded shadow overflow-hidden">
           <table className="min-w-full">

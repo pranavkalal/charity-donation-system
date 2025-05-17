@@ -18,13 +18,13 @@ const DonationList = () => {
           setDonations(res.data);
         } else {
           console.warn('Unexpected response:', res.data);
-          setDonations([]); // fallback to empty array
+          setDonations([]); 
         }
 
       } catch (err) {
         setError('Failed to fetch donations.');
         console.error(' Donation fetch failed:', err);
-        setDonations([]); // safety fallback
+        setDonations([]); 
       }
     };
 
