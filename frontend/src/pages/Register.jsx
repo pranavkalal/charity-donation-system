@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: ''
+  });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -21,39 +26,65 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
+    <div className="min-h-screen bg-[#F7F6FB] flex items-center justify-center py-10 px-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-lg bg-white p-8 rounded-xl shadow-md">
+        <h1 className="text-3xl font-bold text-[#1C2480] mb-6 text-center">Sign Up</h1>
 
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-600 text-sm mb-4 text-center">{error}</p>}
 
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-          required
-        />
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Full Name</label>
+          <input
+            type="text"
+            placeholder="Enter your full name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full p-3 rounded-lg bg-[#F7F6FB] border border-gray-300"
+            required
+          />
+        </div>
 
-        <button type="submit" className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 transition">
-          Register
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Email</label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="w-full p-3 rounded-lg bg-[#F7F6FB] border border-gray-300"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Phone Number</label>
+          <input
+            type="tel"
+            placeholder="e.g. +61 400 000 000"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            className="w-full p-3 rounded-lg bg-[#F7F6FB] border border-gray-300"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-gray-700 mb-1">Password</label>
+          <input
+            type="password"
+            placeholder="Create a password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            className="w-full p-3 rounded-lg bg-[#F7F6FB] border border-gray-300"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-[#1C2480] text-white p-3 rounded-lg hover:bg-[#161c6b] transition text-lg"
+        >
+          Sign Up
         </button>
       </form>
     </div>
